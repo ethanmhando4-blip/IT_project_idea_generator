@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Project Idea Generator</title>
+    <style>
+    :root {
+      color-scheme: dark;
+      --background: #08111f;
+      --surface: #111d30;
+      --surface-light: #182842;
+      --text: #f5f7fb;
+      --muted: #a9b7cb;
+      --accent: #66e3c4;
+      --accent-dark: #08241e;
+      --border: #2a3b55;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, #17355c 0, transparent 35%),
+        var(--background);
+    }
+        main {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 64px 0;
+    }
+
+    .hero {
+      max-width: 700px;
+      margin-bottom: 32px;
+    }
+
+    .eyebrow,
+    .result-label {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+        h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 16px;
+      font-size: clamp(2.4rem, 8vw, 4.8rem);
+      line-height: 0.98;
+    }
+
+    .hero p:last-child {
+      max-width: 620px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+        .generator-panel,
+    .result-card {
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: rgba(17, 29, 48, 0.92);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin: 24px 0;
+    }
+
+    .control {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+        select,
+    button {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 12px;
+      font: inherit;
+    }
+
+    select {
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--surface-light);
+    }
+
+    button {
+      border: 0;
+      color: var(--accent-dark);
+      background: var(--accent);
+      font-weight: 800;
+      cursor: pointer;
+    }
+        button:hover {
+      filter: brightness(1.08);
+    }
+
+    button:focus-visible,
+    select:focus-visible {
+      outline: 3px solid #ffffff;
+      outline-offset: 3px;
+    }
+        .result-card {
+      margin-top: 24px;
+    }
+
+    .result-card h2 {
+      margin-bottom: 12px;
+      font-size: clamp(1.8rem, 5vw, 2.7rem);
+    }
+
+    .result-card > p:not(.result-label),
+    .result-card li {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .result-card h3 {
+      margin: 24px 0 10px;
+    }
+
+    .result-card ul {
+      padding-left: 22px;
+    }
+
+    .hidden {
+      display: none;
+    }
+        @media (max-width: 640px) {
+      main {
+        padding: 36px 0;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .generator-panel,
+      .result-card {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+    <main>
+    <section class="hero">
+      <p class="eyebrow">AI-assisted portfolio builder</p>
+      <h1>Find your next IT project</h1>
+      <p>
+        Choose an IT area and a difficulty level to generate a focused project
+        you can build, test, and discuss in your portfolio.
+      </p>
+    </section>
+        <section class="generator-panel" aria-labelledby="generator-title">
+      <h2 id="generator-title">Generate an idea</h2>
+
+      <div class="controls">
+        <div class="control">
+          <label for="area">IT area</label>
+          <select id="area">
+            <option value="web">Web Development</option>
+            <option value="cybersecurity">Cybersecurity</option>
+            <option value="cloud">Cloud Computing</option>
+            <option value="data">Data Analytics</option>
+          </select>
+        </div>
+
+        <div class="control">
+          <label for="difficulty">Difficulty</label>
+          <select id="difficulty">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="generateButton" type="button">Generate project idea</button>
+    </section>
+        <article id="resultCard" class="result-card hidden" aria-live="polite">
+      <p class="result-label">Your project idea</p>
+      <h2 id="ideaTitle"></h2>
+      <p id="ideaDescription"></p>
+
+      <h3>What you will build</h3>
+      <ul>
+        <li id="deliverableOne"></li>
+        <li id="deliverableTwo"></li>
+        <li id="deliverableThree"></li>
+      </ul>
+
+      <h3>First action</h3>
+      <p id="ideaNextStep"></p>
+    </article>
+  </main>
+
+  <script>
+        const ideas = [
+      {
+        area: "web",
+        difficulty: "beginner",
+        title: "Student Portfolio Site",
+        description: "Create a responsive personal site that introduces your skills and presents your best coursework or practice projects.",
+        deliverables: [
+          "A clear introduction and skills section",
+          "Project cards with outcomes and evidence",
+          "Accessible contact and navigation links"
+        ],
+        nextStep: "Sketch the page sections on paper before writing the first HTML elements."
+      },
+      {
+        area: "web",
+        difficulty: "intermediate",
+        title: "Help Desk Ticket Dashboard",
+        description: "Build a browser dashboard that organizes sample support tickets by priority, status, and category.",
+        deliverables: [
+          "A ticket summary with useful totals",
+          "Filters for priority and status",
+          "A responsive ticket list for narrow screens"
+        ],
+        nextStep: "Define five sample tickets and the fields each ticket needs."
+      },
+            {
+        area: "cybersecurity",
+        difficulty: "beginner",
+        title: "Phishing Awareness Quiz",
+        description: "Create an educational quiz that asks users to identify common warning signs in fictional messages.",
+        deliverables: [
+          "Five fictional message examples",
+          "Immediate feedback for every answer",
+          "A final score with practical safety reminders"
+        ],
+        nextStep: "Write one fictional message and list the clues a learner should notice."
+      },
+      {
+        area: "cybersecurity",
+        difficulty: "intermediate",
+        title: "Security Incident Timeline",
+        description: "Visualize a fictional security incident so a viewer can follow detection, response, recovery, and lessons learned.",
+        deliverables: [
+          "A time-ordered incident view",
+          "Severity and status labels",
+          "A lessons-learned summary"
+        ],
+        nextStep: "Create six fictional incident events with timestamps and short descriptions."
+      },
+            {
+        area: "cloud",
+        difficulty: "beginner",
+        title: "Cloud Architecture Explorer",
+        description: "Create an interactive diagram that explains how a small web application could separate its interface, logic, and data.",
+        deliverables: [
+          "Three clearly labeled architecture layers",
+          "Clickable explanations for each layer",
+          "A short description of how a request moves through the system"
+        ],
+        nextStep: "Draw three boxes for interface, logic, and data, then describe the role of each box."
+      },
+      {
+        area: "cloud",
+        difficulty: "intermediate",
+        title: "Deployment Readiness Checklist",
+        description: "Build a checklist that helps a small team review reliability, security, monitoring, and recovery before a deployment.",
+        deliverables: [
+          "Grouped readiness questions",
+          "A completion score that updates automatically",
+          "A summary of unfinished checks"
+        ],
+        nextStep: "Write three readiness questions for each of the four review areas."
+      },
+            {
+        area: "data",
+        difficulty: "beginner",
+        title: "Study Progress Dashboard",
+        description: "Turn sample study-session records into a visual summary of time spent, topics covered, and weekly progress.",
+        deliverables: [
+          "A small sample dataset",
+          "Summary totals by topic",
+          "A clear weekly progress view"
+        ],
+        nextStep: "Create ten fictional study records with a date, topic, and duration."
+      },
+      {
+        area: "data",
+        difficulty: "intermediate",
+        title: "IT Support Trend Analyzer",
+        description: "Analyze a sample set of support requests to reveal frequent issue categories and changes over time.",
+        deliverables: [
+          "A cleaned sample support dataset",
+          "Issue totals grouped by category",
+          "A written summary of two patterns in the data"
+        ],
+        nextStep: "Define the columns for a sample support-request dataset before collecting records."
+      }
+    ];
+        const areaSelect = document.getElementById("area");
+    const difficultySelect = document.getElementById("difficulty");
+    const generateButton = document.getElementById("generateButton");
+    const resultCard = document.getElementById("resultCard");
+    const ideaTitle = document.getElementById("ideaTitle");
+    const ideaDescription = document.getElementById("ideaDescription");
+    const deliverableOne = document.getElementById("deliverableOne");
+    const deliverableTwo = document.getElementById("deliverableTwo");
+    const deliverableThree = document.getElementById("deliverableThree");
+    const ideaNextStep = document.getElementById("ideaNextStep");
+        function showIdea(idea) {
+      if (!idea) {
+        return;
+      }
+
+      ideaTitle.textContent = idea.title;
+      ideaDescription.textContent = idea.description;
+      deliverableOne.textContent = idea.deliverables[0];
+      deliverableTwo.textContent = idea.deliverables[1];
+      deliverableThree.textContent = idea.deliverables[2];
+      ideaNextStep.textContent = idea.nextStep;
+      resultCard.classList.remove("hidden");
+    }
+        function generateIdea() {
+      const selectedIdea = ideas.find((idea) =>
+        idea.area === areaSelect.value &&
+        idea.difficulty === difficultySelect.value
+      );
+
+      showIdea(selectedIdea);
+    }
+
+    generateButton.addEventListener("click", generateIdea);
+  </script>
+</body>
+</html>
